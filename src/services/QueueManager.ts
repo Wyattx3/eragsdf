@@ -30,6 +30,7 @@ export class QueueManager {
       skipVotesNeeded: 0,
       autoplay: false,
       lastPlayedSong: null,
+      nowPlayingMessage: null,
     };
 
     this.queues.set(guildId, queue);
@@ -210,6 +211,18 @@ export class QueueManager {
     return Array.from(this.queues.values()).filter(
       (q) => q.isPlaying
     ).length;
+  }
+
+  public setNowPlayingMessage(guildId: string, message: any): void {
+    const queue = this.queues.get(guildId);
+    if (queue) {
+      queue.nowPlayingMessage = message;
+    }
+  }
+
+  public getNowPlayingMessage(guildId: string): any | null {
+    const queue = this.queues.get(guildId);
+    return queue?.nowPlayingMessage || null;
   }
 }
 

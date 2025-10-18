@@ -104,3 +104,46 @@ export function createLoopEmbed(mode: LoopMode): EmbedBuilder {
     .setTimestamp();
 }
 
+export function createProgressBar(current: number, total: number, length: number = 20): string {
+  if (total === 0) return '━'.repeat(length);
+  
+  const progress = Math.min(current / total, 1);
+  const filled = Math.floor(progress * length);
+  const empty = length - filled;
+  
+  const filledBar = '━'.repeat(filled);
+  const emptyBar = '─'.repeat(empty);
+  
+  return `${filledBar}🔘${emptyBar}`;
+}
+
+export function createPremiumNowPlayingEmbed(
+  song: Song, 
+  position: number = 0,
+  isAutoplay: boolean = false
+): EmbedBuilder {
+  const progressBar = createProgressBar(position, song.duration);
+  const currentTime = youtubeService.formatDuration(position);
+  const totalTime = youtubeService.formatDuration(song.duration);
+  
+  const autoplayBadge = isAutoplay ? '🎵 Auto-play' : '';
+  
+  const embed = new EmbedBuilder()
+    .setColor(config.colors.primary)
+    .setTitle(`${config.emojis.play} ယခု ဖွင့်နေပါသည်`)
+    .setDescription(`**[${song.title}](${song.url})**\n\n${progressBar}\n\`${currentTime}\` ━━━━━━━━━━━━ \`${totalTime}\``)
+    .addFields(
+      { name: '👤 တောင်းဆိုသူ', value: song.requestedBy, inline: true },
+      { name: '📺 Channel', value: song.channel || 'SoundCloud', inline: true },
+      { name: '🎵 ကြာချိန်', value: totalTime, inline: true }
+    )
+    .setThumbnail(song.thumbnail)
+    .setTimestamp();
+  
+  if (autoplayBadge) {
+    embed.setFooter({ text: autoplayBadge });
+  }
+  
+  return embed;
+}
+

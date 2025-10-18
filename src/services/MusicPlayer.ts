@@ -13,6 +13,8 @@ import play from 'play-dl';
 import { queueManager } from './QueueManager';
 import { Song, AudioFilter, LoopMode } from '../types';
 import { config } from '../config';
+import { createPremiumNowPlayingEmbed } from '../utils/embedBuilder';
+import { createMusicControlButtons } from '../utils/buttonBuilder';
 
 export class MusicPlayer {
   private disconnectTimers: Map<string, NodeJS.Timeout> = new Map();
@@ -126,6 +128,9 @@ export class MusicPlayer {
       queue.resource = resource;
       queue.player!.play(resource);
       queue.isPlaying = true;
+      
+      // Update now playing message
+      await this.updateNowPlayingMessage(guildId, song);
     } catch (error: any) {
       console.error('Play error:', error?.message || error);
       
@@ -256,6 +261,31 @@ export class MusicPlayer {
     if (timer) {
       clearTimeout(timer);
       this.disconnectTimers.delete(guildId);
+    }
+  }
+
+  private async updateNowPlayingMessage(guildId: string, song: Song): Promise<void> {
+    try {
+      const queue = queueManager.getQueue(guildId);
+      if (!queue) return;
+
+      const message = queueManager.getNowPlayingMessage(guildId);
+      if (!message) return;
+
+      // Check if song was added by autoplay
+      const isAutoplay = song.requestedBy === 'Auto-play 🎵';
+      
+      // Create premium embed with progress bar
+      const embed = createPremiumNowPlayingEmbed(song, 0, isAutoplay || queue.autoplay);
+      
+      // Update the message with new song info
+      await message.edit({
+        embeds: [embed],
+        components: createMusicControlButtons(),
+      });
+    } catch (error: any) {
+      // Message might have been deleted or permissions issue
+      console.log('⚠️ Could not update now playing message:', error?.message);
     }
   }
 }

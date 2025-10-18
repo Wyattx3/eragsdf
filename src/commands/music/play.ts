@@ -82,7 +82,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
       if (queue.songs.length === 1) {
         await musicPlayer.play(member!, voiceChannel!, songs[0]);
         
-        await interaction.editReply({
+        const reply = await interaction.editReply({
           embeds: [
             createMusicEmbed(
               'ယခု ဖွင့်နေပါသည်',
@@ -91,6 +91,9 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
           ],
           components: createMusicControlButtons(),
         });
+        
+        // Store message reference for updates
+        queueManager.setNowPlayingMessage(guildId, reply);
       } else {
         await interaction.editReply({
           embeds: [
