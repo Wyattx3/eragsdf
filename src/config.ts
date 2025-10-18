@@ -37,13 +37,16 @@ export const config = {
     GatewayIntentBits.MessageContent,
   ],
   
-  // Colors
+  // Colors - Premium Purple/Blue Gradient Theme
   colors: {
-    primary: 0x5865F2,
-    success: 0x57F287,
-    warning: 0xFEE75C,
-    error: 0xED4245,
-    info: 0x00D9FF,
+    primary: 0x6366F1,      // Indigo
+    secondary: 0x8B5CF6,    // Purple  
+    accent: 0x0EA5E9,       // Sky Blue
+    success: 0x10B981,      // Emerald
+    warning: 0xF59E0B,      // Amber
+    error: 0xEF4444,        // Red
+    info: 0x06B6D4,         // Cyan
+    premium: 0xA855F7,      // Purple gradient
   },
   
   // Emojis

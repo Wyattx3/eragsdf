@@ -10,7 +10,8 @@ export function createSuccessEmbed(
   return new EmbedBuilder()
     .setColor(config.colors.success)
     .setTitle(`${config.emojis.success} ${title}`)
-    .setDescription(description)
+    .setDescription(`╔═══════════════════╗\n${description}\n╚═══════════════════╝`)
+    .setFooter({ text: '✨ DC Spider Premium Music Bot' })
     .setTimestamp();
 }
 
@@ -21,7 +22,8 @@ export function createErrorEmbed(
   return new EmbedBuilder()
     .setColor(config.colors.error)
     .setTitle(`${config.emojis.error} ${title}`)
-    .setDescription(description)
+    .setDescription(`╔═══════════════════╗\n${description}\n╚═══════════════════╝`)
+    .setFooter({ text: '✨ DC Spider Premium Music Bot' })
     .setTimestamp();
 }
 
@@ -30,9 +32,10 @@ export function createMusicEmbed(
   description: string
 ): EmbedBuilder {
   return new EmbedBuilder()
-    .setColor(config.colors.primary)
+    .setColor(config.colors.premium)
     .setTitle(`${config.emojis.music} ${title}`)
-    .setDescription(description)
+    .setDescription(`╔═══════════════════╗\n${description}\n╚═══════════════════╝`)
+    .setFooter({ text: '✨ DC Spider Premium Music Bot' })
     .setTimestamp();
 }
 
@@ -56,13 +59,13 @@ export function createQueueEmbed(
   totalPages: number
 ): EmbedBuilder {
   const embed = new EmbedBuilder()
-    .setColor(config.colors.info)
-    .setTitle(`${config.emojis.queue} သီချင်းစာရင်း`)
-    .setFooter({ text: `စာမျက်နှာ ${currentPage}/${totalPages}` })
+    .setColor(config.colors.accent)
+    .setTitle(`📜 သီချင်းစာရင်း`)
+    .setFooter({ text: `✨ စာမျက်နှာ ${currentPage}/${totalPages} • DC Spider Premium` })
     .setTimestamp();
 
   if (songs.length === 0) {
-    embed.setDescription('စာရင်းတွင် သီချင်း မရှိပါ');
+    embed.setDescription('╔══════════════════╗\n\n   စာရင်းတွင် သီချင်း မရှိပါ\n\n╚══════════════════╝');
     return embed;
   }
 
@@ -70,13 +73,15 @@ export function createQueueEmbed(
   const end = start + 10;
   const pageSongs = songs.slice(start, end);
 
-  let description = '';
+  let description = '╔══════════════════════════════╗\n\n';
   pageSongs.forEach((song, index) => {
     const position = start + index;
-    const icon = position === 0 ? config.emojis.play : `${position}.`;
+    const icon = position === 0 ? '▶️' : `\`${position}.\``;
     description += `${icon} **[${song.title}](${song.url})**\n`;
-    description += `   ⏱️ ${youtubeService.formatDuration(song.duration)} | 👤 ${song.requestedBy}\n\n`;
+    description += `   ⏱️ ${youtubeService.formatDuration(song.duration)} • 👤 ${song.requestedBy}\n`;
+    description += `   ─────────────────────────\n`;
   });
+  description += '\n╚══════════════════════════════╝';
 
   embed.setDescription(description);
   return embed;
@@ -84,23 +89,28 @@ export function createQueueEmbed(
 
 export function createLoopEmbed(mode: LoopMode): EmbedBuilder {
   let description = '';
+  let emoji = '';
   
   switch (mode) {
     case LoopMode.OFF:
-      description = 'Loop mode ကို **ပိတ်ထား**ပါသည်';
+      description = '⭕ Loop mode ကို **ပိတ်ထား**ပါသည်';
+      emoji = '⭕';
       break;
     case LoopMode.SONG:
-      description = 'လက်ရှိသီချင်းကို **ထပ်တလဲလဲ ဖွင့်**မည်';
+      description = '🔂 လက်ရှိသီချင်းကို **ထပ်တလဲလဲ ဖွင့်**မည်';
+      emoji = '🔂';
       break;
     case LoopMode.QUEUE:
-      description = 'သီချင်းစာရင်းတစ်ခုလုံးကို **ထပ်တလဲလဲ ဖွင့်**မည်';
+      description = '🔁 သီချင်းစာရင်းတစ်ခုလုံးကို **ထပ်တလဲလဲ ဖွင့်**မည်';
+      emoji = '🔁';
       break;
   }
 
   return new EmbedBuilder()
-    .setColor(config.colors.success)
-    .setTitle(`${config.emojis.loop} Loop Mode`)
-    .setDescription(description)
+    .setColor(config.colors.secondary)
+    .setTitle(`${emoji} Loop Mode`)
+    .setDescription(`╔══════════════════╗\n\n${description}\n\n╚══════════════════╝`)
+    .setFooter({ text: '✨ DC Spider Premium Music Bot' })
     .setTimestamp();
 }
 
@@ -126,23 +136,20 @@ export function createPremiumNowPlayingEmbed(
   const currentTime = youtubeService.formatDuration(position);
   const totalTime = youtubeService.formatDuration(song.duration);
   
-  const autoplayBadge = isAutoplay ? '🎵 Auto-play' : '';
+  const autoplayBadge = isAutoplay ? '🎵 Auto-play Enabled' : '✨ DC Spider Premium Music Bot';
   
   const embed = new EmbedBuilder()
-    .setColor(config.colors.primary)
-    .setTitle(`${config.emojis.play} ယခု ဖွင့်နေပါသည်`)
-    .setDescription(`**[${song.title}](${song.url})**\n\n${progressBar}\n\`${currentTime}\` ━━━━━━━━━━━━ \`${totalTime}\``)
+    .setColor(config.colors.premium)
+    .setTitle(`🎵 ယခု ဖွင့်နေပါသည်`)
+    .setDescription(`╔══════════════════════════════╗\n\n**[${song.title}](${song.url})**\n\n${progressBar}\n\`${currentTime}\` ━━━━━━━━━━━━━━━ \`${totalTime}\`\n\n╚══════════════════════════════╝`)
     .addFields(
-      { name: '👤 တောင်းဆိုသူ', value: song.requestedBy, inline: true },
-      { name: '📺 Channel', value: song.channel || 'SoundCloud', inline: true },
-      { name: '🎵 ကြာချိန်', value: totalTime, inline: true }
+      { name: '👤 တောင်းဆိုသူ', value: `\`${song.requestedBy}\``, inline: true },
+      { name: '📺 Channel', value: `\`${song.channel || 'SoundCloud'}\``, inline: true },
+      { name: '⏱️ ကြာချိန်', value: `\`${totalTime}\``, inline: true }
     )
     .setThumbnail(song.thumbnail)
+    .setFooter({ text: autoplayBadge, iconURL: 'https://cdn.discordapp.com/emojis/314068430556758017.png' })
     .setTimestamp();
-  
-  if (autoplayBadge) {
-    embed.setFooter({ text: autoplayBadge });
-  }
   
   return embed;
 }

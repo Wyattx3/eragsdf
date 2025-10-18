@@ -21,6 +21,18 @@ export class ButtonHandler {
     }
 
     const queue = queueManager.getQueue(guildId);
+    
+    // Check if queue exists for actions that require it
+    if (!queue) {
+      await interaction.reply({
+        embeds: [createErrorEmbed(
+          '❌ Queue မရှိပါ', 
+          'လက်ရှိ သီချင်း မဖွင့်နေပါ။ `/play` command ဖြင့် သီချင်း ဖွင့်ပါ။'
+        )],
+        ephemeral: true,
+      });
+      return;
+    }
 
     // Handle different button actions
     switch (customId) {
@@ -78,14 +90,6 @@ export class ButtonHandler {
   }
 
   private async handleResume(interaction: ButtonInteraction, queue: any): Promise<void> {
-    if (!queue) {
-      await interaction.reply({
-        embeds: [createErrorEmbed('အမှား', 'Queue မရှိပါ')],
-        ephemeral: true,
-      });
-      return;
-    }
-
     const resumed = musicPlayer.resume(interaction.guildId!);
 
     if (resumed) {
@@ -101,14 +105,6 @@ export class ButtonHandler {
   }
 
   private async handlePause(interaction: ButtonInteraction, queue: any): Promise<void> {
-    if (!queue) {
-      await interaction.reply({
-        embeds: [createErrorEmbed('အမှား', 'Queue မရှိပါ')],
-        ephemeral: true,
-      });
-      return;
-    }
-
     const paused = musicPlayer.pause(interaction.guildId!);
 
     if (paused) {
@@ -147,14 +143,6 @@ export class ButtonHandler {
   }
 
   private async handleStop(interaction: ButtonInteraction, queue: any): Promise<void> {
-    if (!queue) {
-      await interaction.reply({
-        embeds: [createErrorEmbed('အမှား', 'Queue မရှိပါ')],
-        ephemeral: true,
-      });
-      return;
-    }
-
     musicPlayer.stop(interaction.guildId!);
 
     await interaction.reply({
@@ -163,14 +151,6 @@ export class ButtonHandler {
   }
 
   private async handleVolumeUp(interaction: ButtonInteraction, queue: any): Promise<void> {
-    if (!queue) {
-      await interaction.reply({
-        embeds: [createErrorEmbed('အမှား', 'Queue မရှိပါ')],
-        ephemeral: true,
-      });
-      return;
-    }
-
     const newVolume = Math.min(queue.volume + 10, 100);
     queueManager.setVolume(interaction.guildId!, newVolume);
 
@@ -180,14 +160,6 @@ export class ButtonHandler {
   }
 
   private async handleVolumeDown(interaction: ButtonInteraction, queue: any): Promise<void> {
-    if (!queue) {
-      await interaction.reply({
-        embeds: [createErrorEmbed('အမှား', 'Queue မရှိပါ')],
-        ephemeral: true,
-      });
-      return;
-    }
-
     const newVolume = Math.max(queue.volume - 10, 0);
     queueManager.setVolume(interaction.guildId!, newVolume);
 
@@ -197,14 +169,6 @@ export class ButtonHandler {
   }
 
   private async handleLoop(interaction: ButtonInteraction, queue: any): Promise<void> {
-    if (!queue) {
-      await interaction.reply({
-        embeds: [createErrorEmbed('အမှား', 'Queue မရှိပါ')],
-        ephemeral: true,
-      });
-      return;
-    }
-
     // Cycle through loop modes
     let newMode: LoopMode;
     switch (queue.loopMode) {
@@ -251,14 +215,6 @@ export class ButtonHandler {
   }
 
   private async handleAutoplay(interaction: ButtonInteraction, queue: any): Promise<void> {
-    if (!queue) {
-      await interaction.reply({
-        embeds: [createErrorEmbed('အမှား', 'Queue မရှိပါ')],
-        ephemeral: true,
-      });
-      return;
-    }
-
     const enabled = queueManager.toggleAutoplay(interaction.guildId!);
     const status = enabled ? 'ဖွင့်' : 'ပိတ်';
     const description = enabled 
