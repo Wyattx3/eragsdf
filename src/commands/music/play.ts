@@ -22,13 +22,23 @@ export const data = new SlashCommandBuilder()
   );
 
 export async function execute(interaction: ChatInputCommandInteraction): Promise<void> {
-  await interaction.deferReply();
+  try {
+    await interaction.deferReply();
+  } catch (error: any) {
+    // If deferReply fails, the interaction likely expired
+    console.log('⚠️ Could not defer reply:', error?.message);
+    return;
+  }
 
   const validation = await validateMusicCommand(interaction);
   if (!validation.success) {
-    await interaction.editReply({
-      embeds: [createErrorEmbed('အမှား', validation.error!)],
-    });
+    try {
+      await interaction.editReply({
+        embeds: [createErrorEmbed('အမှား', validation.error!)],
+      });
+    } catch (error) {
+      console.log('⚠️ Could not edit reply - interaction may have expired');
+    }
     return;
   }
 
@@ -122,9 +132,13 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     }
   } catch (error: any) {
     console.error('Play command error:', error);
-    await interaction.editReply({
-      embeds: [createErrorEmbed('အမှား', error.message || 'သီချင်း ဖွင့်၍မရပါ')],
-    });
+    try {
+      await interaction.editReply({
+        embeds: [createErrorEmbed('အမှား', error.message || 'သီချင်း ဖွင့်၍မရပါ')],
+      });
+    } catch (replyError) {
+      console.log('⚠️ Could not send error message - interaction may have expired');
+    }
   }
 }
 

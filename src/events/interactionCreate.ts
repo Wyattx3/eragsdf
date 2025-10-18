@@ -37,24 +37,41 @@ export async function execute(interaction: BaseInteraction): Promise<void> {
 
   try {
     await command.execute(interaction as ChatInputCommandInteraction);
-  } catch (error) {
+  } catch (error: any) {
     console.error(`❌ Error executing command ${interaction.commandName}:`, error);
+
+    // Ignore "Unknown interaction" errors (interaction expired)
+    if (error?.code === 10062 || error?.message?.includes('Unknown interaction')) {
+      console.log('⚠️ Interaction expired - this is normal for slow operations');
+      return;
+    }
+
+    // Ignore "Interaction already acknowledged" errors
+    if (error?.code === 40060 || error?.message?.includes('already been acknowledged')) {
+      console.log('⚠️ Interaction already acknowledged');
+      return;
+    }
 
     const errorEmbed = createErrorEmbed(
       'အမှား ဖြစ်ပေါ်ခဲ့သည်',
       'Command ကို လုပ်ဆောင်ရာတွင် အမှား ဖြစ်ပေါ်ခဲ့သည်'
     );
 
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        embeds: [errorEmbed],
-        ephemeral: true,
-      });
-    } else {
-      await interaction.reply({
-        embeds: [errorEmbed],
-        ephemeral: true,
-      });
+    try {
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({
+          embeds: [errorEmbed],
+          flags: [4096], // EPHEMERAL flag
+        });
+      } else {
+        await interaction.reply({
+          embeds: [errorEmbed],
+          flags: [4096], // EPHEMERAL flag
+        });
+      }
+    } catch (replyError: any) {
+      // Silently fail if we can't send error message
+      console.log('⚠️ Could not send error reply:', replyError?.message);
     }
   }
 }
