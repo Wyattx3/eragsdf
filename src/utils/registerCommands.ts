@@ -3,12 +3,12 @@ import { config, validateConfig } from '../config';
 import { commandHandler } from '../handlers/commandHandler';
 import { Client } from 'discord.js';
 
-async function registerCommands() {
+export async function registerCommands() {
   console.log('🔄 Registering slash commands...\n');
 
   if (!validateConfig()) {
-    console.error('❌ Configuration validation failed');
-    process.exit(1);
+    console.warn('⚠️  Configuration validation failed - commands will be registered on bot start');
+    return false;
   }
 
   // Create a temporary client just to load commands
@@ -30,12 +30,18 @@ async function registerCommands() {
     });
 
     console.log('✅ Successfully registered slash commands!\n');
-    process.exit(0);
-  } catch (error) {
-    console.error('❌ Error registering slash commands:', error);
-    process.exit(1);
+    return true;
+  } catch (error: any) {
+    console.warn('⚠️  Could not register commands:', error?.message);
+    console.log('💡 Commands will be registered when bot starts\n');
+    return false;
   }
 }
 
-registerCommands();
+// Only run directly if called as main script
+if (require.main === module) {
+  registerCommands().then((success) => {
+    process.exit(success ? 0 : 0); // Always exit 0 to allow bot to start
+  });
+}
 

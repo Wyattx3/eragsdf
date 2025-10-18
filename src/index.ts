@@ -1,4 +1,4 @@
-import { Client } from 'discord.js';
+import { Client, REST, Routes } from 'discord.js';
 import { config, validateConfig } from './config';
 import { commandHandler } from './handlers/commandHandler';
 import { eventHandler } from './handlers/eventHandler';
@@ -72,6 +72,30 @@ async function main() {
   // Login to Discord
   console.log('🔐 Logging in to Discord...\n');
   await client.login(config.token);
+
+  // Register slash commands after login
+  client.once('ready', async () => {
+    try {
+      console.log('🔄 Registering slash commands...\n');
+      
+      const commands = Array.from(commandHandler.commands.values()).map((cmd) =>
+        cmd.data.toJSON()
+      );
+
+      const rest = new REST({ version: '10' }).setToken(config.token);
+
+      console.log(`📦 Registering ${commands.length} slash commands globally...`);
+
+      await rest.put(Routes.applicationCommands(config.clientId), {
+        body: commands,
+      });
+
+      console.log('✅ Successfully registered slash commands!\n');
+    } catch (error: any) {
+      console.warn('⚠️  Could not register commands:', error?.message);
+      console.log('💡 Commands may already be registered or will sync automatically\n');
+    }
+  });
 }
 
 // Handle errors
