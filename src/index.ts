@@ -18,7 +18,15 @@ async function main() {
   for (let i = 0; i < maxRetries; i++) {
     try {
       console.log(`🔧 Initializing SoundCloud support... (attempt ${i + 1}/${maxRetries})`);
-      await play.getFreeClientID();
+      
+      // Get free client ID and set it properly
+      const clientID = await play.getFreeClientID();
+      await play.setToken({
+        soundcloud: {
+          client_id: clientID
+        }
+      });
+      
       console.log('✅ SoundCloud initialized successfully\n');
       soundCloudInitialized = true;
       break;
