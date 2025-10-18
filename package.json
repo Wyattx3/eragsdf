@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
+    "start:prod": "node dist/utils/registerCommands.js && node dist/index.js",
     "dev": "ts-node src/index.ts",
     "register": "node dist/utils/registerCommands.js",
     "watch": "tsc -w"
