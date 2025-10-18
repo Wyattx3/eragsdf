@@ -9,6 +9,7 @@ import { musicPlayer } from '../../services/MusicPlayer';
 import { youtubeService } from '../../services/YouTubeService';
 import { validateMusicCommand } from '../../utils/validators';
 import { createSuccessEmbed, createErrorEmbed, createMusicEmbed } from '../../utils/embedBuilder';
+import { createMusicControlButtons } from '../../utils/buttonBuilder';
 import { config } from '../../config';
 
 export const data = new SlashCommandBuilder()
@@ -88,6 +89,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
               `**[${songs[0].title}](${songs[0].url})**\n\n⏱️ ${youtubeService.formatDuration(songs[0].duration)}`
             ).setThumbnail(songs[0].thumbnail)
           ],
+          components: createMusicControlButtons(),
         });
       } else {
         await interaction.editReply({
@@ -97,6 +99,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
               `**[${songs[0].title}](${songs[0].url})**\n\nအနေအထား: ${queue.songs.length}`
             ).setThumbnail(songs[0].thumbnail)
           ],
+          components: createMusicControlButtons(),
         });
       }
     } else {
@@ -128,6 +131,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
             `${added} သီချင်းကို စာရင်းထဲထည့်ပြီးပါပြီ`
           )
         ],
+        components: createMusicControlButtons(),
       });
     }
   } catch (error: any) {
