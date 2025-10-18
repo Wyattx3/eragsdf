@@ -11,14 +11,29 @@ async function main() {
   console.log('🎧 Powered by SoundCloud');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-  // Initialize SoundCloud support
-  try {
-    console.log('🔧 Initializing SoundCloud support...');
-    await play.getFreeClientID();
-    console.log('✅ SoundCloud initialized successfully\n');
-  } catch (error) {
-    console.error('⚠️  Failed to initialize SoundCloud:', error);
-    console.log('⚠️  Bot will continue but SoundCloud may not work properly\n');
+  // Initialize SoundCloud support with retry
+  let soundCloudInitialized = false;
+  const maxRetries = 3;
+  
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      console.log(`🔧 Initializing SoundCloud support... (attempt ${i + 1}/${maxRetries})`);
+      await play.getFreeClientID();
+      console.log('✅ SoundCloud initialized successfully\n');
+      soundCloudInitialized = true;
+      break;
+    } catch (error) {
+      console.error(`⚠️  Attempt ${i + 1} failed:`, error);
+      if (i < maxRetries - 1) {
+        console.log('⏳ Retrying in 2 seconds...\n');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
+  
+  if (!soundCloudInitialized) {
+    console.error('❌ Failed to initialize SoundCloud after all retries');
+    console.log('⚠️  Bot will continue but music features may not work\n');
   }
 
   // Validate configuration

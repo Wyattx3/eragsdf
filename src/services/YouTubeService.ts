@@ -9,9 +9,15 @@ export class MusicService {
     try {
       const results = await play.search(query, { limit, source: { soundcloud: 'tracks' } });
       return results.map((track) => this.formatSoundCloudSong(track as any));
-    } catch (error) {
+    } catch (error: any) {
       console.error('SoundCloud search error:', error);
-      throw new Error('ဂီတရှာဖွေမှု မအောင်မြင်ပါ');
+      
+      // Check if it's a client_id error
+      if (error?.message?.includes('client_id') || error?.toString()?.includes('client_id')) {
+        throw new Error('⚠️ SoundCloud ကို initialize မလုပ်ရသေးပါ။ Bot ကို restart လုပ်ပါ။');
+      }
+      
+      throw new Error('ဂီတရှာဖွေမှု မအောင်မြင်ပါ။ ထပ်ကြိုးစားကြည့်ပါ။');
     }
   }
 
