@@ -89,7 +89,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
               `**[${songs[0].title}](${songs[0].url})**\n\n⏱️ ${youtubeService.formatDuration(songs[0].duration)}`
             ).setThumbnail(songs[0].thumbnail)
           ],
-          components: createMusicControlButtons(),
+          components: createMusicControlButtons(true), // Playing
         });
         
         // Store message reference for updates
@@ -102,7 +102,7 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
               `**[${songs[0].title}](${songs[0].url})**\n\nအနေအထား: ${queue.songs.length}`
             ).setThumbnail(songs[0].thumbnail)
           ],
-          components: createMusicControlButtons(),
+          components: createMusicControlButtons(queue.isPlaying),
         });
       }
     } else {

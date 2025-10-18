@@ -2,8 +2,8 @@ import { ButtonInteraction, GuildMember } from 'discord.js';
 import { queueManager } from '../services/QueueManager';
 import { musicPlayer } from '../services/MusicPlayer';
 import { LoopMode } from '../types';
-import { createSuccessEmbed, createErrorEmbed, createQueueEmbed, createNowPlayingEmbed } from '../utils/embedBuilder';
-import { createNowPlayingButtons } from '../utils/buttonBuilder';
+import { createSuccessEmbed, createErrorEmbed, createQueueEmbed, createNowPlayingEmbed, createPremiumNowPlayingEmbed } from '../utils/embedBuilder';
+import { createNowPlayingButtons, createMusicControlButtons } from '../utils/buttonBuilder';
 
 export class ButtonHandler {
   async handleMusicButton(interaction: ButtonInteraction): Promise<void> {
@@ -92,9 +92,11 @@ export class ButtonHandler {
   private async handleResume(interaction: ButtonInteraction, queue: any): Promise<void> {
     const resumed = musicPlayer.resume(interaction.guildId!);
 
-    if (resumed) {
-      await interaction.reply({
-        embeds: [createSuccessEmbed('▶️ Resume', 'သီချင်းကို ပြန်ဖွင့်နေပါပြီ')],
+    if (resumed && queue.songs[0]) {
+      // Update message with pause button
+      await interaction.update({
+        embeds: [createPremiumNowPlayingEmbed(queue.songs[0], 0, queue.autoplay)],
+        components: createMusicControlButtons(true), // Now playing
       });
     } else {
       await interaction.reply({
@@ -107,9 +109,11 @@ export class ButtonHandler {
   private async handlePause(interaction: ButtonInteraction, queue: any): Promise<void> {
     const paused = musicPlayer.pause(interaction.guildId!);
 
-    if (paused) {
-      await interaction.reply({
-        embeds: [createSuccessEmbed('⏸️ Pause', 'သီချင်းကို ခဏရပ်လိုက်ပါပြီ')],
+    if (paused && queue.songs[0]) {
+      // Update message with play button
+      await interaction.update({
+        embeds: [createPremiumNowPlayingEmbed(queue.songs[0], 0, queue.autoplay)],
+        components: createMusicControlButtons(false), // Paused
       });
     } else {
       await interaction.reply({
@@ -128,16 +132,23 @@ export class ButtonHandler {
       return;
     }
 
-    const skipped = await musicPlayer.skip(interaction.guildId!);
+    // Defer the update since skip takes time
+    await interaction.deferUpdate();
 
-    if (skipped) {
-      await interaction.reply({
-        embeds: [createSuccessEmbed('⏭️ Skip', `**${skipped.title}** ကို ကျော်လိုက်ပါပြီ`)],
+    const skipped = await musicPlayer.skip(interaction.guildId!);
+    const newQueue = queueManager.getQueue(interaction.guildId!);
+
+    if (skipped && newQueue && newQueue.songs[0]) {
+      // Update with next song
+      await interaction.editReply({
+        embeds: [createPremiumNowPlayingEmbed(newQueue.songs[0], 0, newQueue.autoplay)],
+        components: createMusicControlButtons(newQueue.isPlaying),
       });
-    } else {
-      await interaction.reply({
-        embeds: [createErrorEmbed('အမှား', 'Skip လုပ်၍မရပါ')],
-        ephemeral: true,
+    } else if (skipped) {
+      // No more songs
+      await interaction.editReply({
+        embeds: [createSuccessEmbed('⏭️ Skip', `**${skipped.title}** ကို ကျော်လိုက်ပါပြီ\n\nQueue ပြီးဆုံးသွားပါပြီ။`)],
+        components: [],
       });
     }
   }

@@ -4,20 +4,22 @@ import {
   ButtonStyle 
 } from 'discord.js';
 
-export function createMusicControlButtons() {
+export function createMusicControlButtons(isPlaying: boolean = true) {
   // Row 1: Playback controls
   const row1 = new ActionRowBuilder<ButtonBuilder>()
     .addComponents(
-      new ButtonBuilder()
-        .setCustomId('music_play')
-        .setLabel('Play')
-        .setEmoji('▶️')
-        .setStyle(ButtonStyle.Success),
-      new ButtonBuilder()
-        .setCustomId('music_pause')
-        .setLabel('Pause')
-        .setEmoji('⏸️')
-        .setStyle(ButtonStyle.Primary),
+      // Dynamic Play/Pause button based on state
+      isPlaying 
+        ? new ButtonBuilder()
+            .setCustomId('music_pause')
+            .setLabel('Pause')
+            .setEmoji('⏸️')
+            .setStyle(ButtonStyle.Primary)
+        : new ButtonBuilder()
+            .setCustomId('music_resume')
+            .setLabel('Resume')
+            .setEmoji('▶️')
+            .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
         .setCustomId('music_skip')
         .setLabel('Skip')
@@ -27,21 +29,26 @@ export function createMusicControlButtons() {
         .setCustomId('music_stop')
         .setLabel('Stop')
         .setEmoji('⏹️')
-        .setStyle(ButtonStyle.Danger)
+        .setStyle(ButtonStyle.Danger),
+      new ButtonBuilder()
+        .setCustomId('music_queue')
+        .setLabel('Queue')
+        .setEmoji('📜')
+        .setStyle(ButtonStyle.Secondary)
     );
 
-  // Row 2: Volume & Queue controls
+  // Row 2: Volume & Loop controls
   const row2 = new ActionRowBuilder<ButtonBuilder>()
     .addComponents(
       new ButtonBuilder()
-        .setCustomId('music_volume_up')
-        .setLabel('Vol+')
-        .setEmoji('🔊')
+        .setCustomId('music_volume_down')
+        .setLabel('Vol -')
+        .setEmoji('🔉')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
-        .setCustomId('music_volume_down')
-        .setLabel('Vol-')
-        .setEmoji('🔉')
+        .setCustomId('music_volume_up')
+        .setLabel('Vol +')
+        .setEmoji('🔊')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('music_loop')
@@ -52,30 +59,15 @@ export function createMusicControlButtons() {
         .setCustomId('music_shuffle')
         .setLabel('Shuffle')
         .setEmoji('🔀')
-        .setStyle(ButtonStyle.Secondary)
-    );
-
-  // Row 3: Advanced features
-  const row3 = new ActionRowBuilder<ButtonBuilder>()
-    .addComponents(
+        .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId('music_autoplay')
         .setLabel('Auto-play')
         .setEmoji('🎵')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId('music_queue')
-        .setLabel('Queue')
-        .setEmoji('📜')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId('music_info')
-        .setLabel('Info')
-        .setEmoji('ℹ️')
         .setStyle(ButtonStyle.Secondary)
     );
 
-  return [row1, row2, row3];
+  return [row1, row2];
 }
 
 export function createQueueNavigationButtons(currentPage: number, totalPages: number) {

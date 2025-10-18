@@ -278,10 +278,10 @@ export class MusicPlayer {
       // Create premium embed with progress bar
       const embed = createPremiumNowPlayingEmbed(song, 0, isAutoplay || queue.autoplay);
       
-      // Update the message with new song info
+      // Update the message with new song info and correct button state
       await message.edit({
         embeds: [embed],
-        components: createMusicControlButtons(),
+        components: createMusicControlButtons(queue.isPlaying),
       });
     } catch (error: any) {
       // Message might have been deleted or permissions issue
